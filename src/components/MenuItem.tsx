@@ -1,7 +1,9 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { MenuItemType } from '@/types/menu';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { ChefHat } from 'lucide-react';
 
 interface MenuItemProps {
   item: MenuItemType;
@@ -31,7 +33,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({ item, onCustomize }) => {
           </p>
         </div>
         
-        <div className="pt-2">
+        <div className="pt-2 space-y-2">
           <Button
             onClick={() => onCustomize(item)}
             className="w-full"
@@ -39,6 +41,15 @@ export const MenuItem: React.FC<MenuItemProps> = ({ item, onCustomize }) => {
           >
             Customize & Add to Cart
           </Button>
+          
+          {item.id === '1' && (
+            <Link to="/kitchen/recipe/caesar-salad" className="block">
+              <Button variant="ghost" size="sm" className="w-full text-xs">
+                <ChefHat className="h-3 w-3 mr-1" />
+                Kitchen Recipe
+              </Button>
+            </Link>
+          )}
         </div>
       </CardContent>
     </Card>
