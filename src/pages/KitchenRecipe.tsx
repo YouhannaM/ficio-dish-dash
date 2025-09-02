@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Clock, Users, ChefHat, CheckCircle, Thermometer, Camera, Wifi, Activity } from 'lucide-react';
+import { ArrowLeft, Clock, Users, ChefHat, CheckCircle, Thermometer, Camera, Wifi, Activity, AlertTriangle } from 'lucide-react';
+import lettuceAnalysisImage from '@/assets/lettuce-analysis.jpg';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +32,9 @@ const KitchenRecipe = () => {
       color: 'Vibrant green',
       texture: 'Crisp and firm',
       cutQuality: 'Uniform 1-inch pieces',
-      contamination: 'None detected'
+      contamination: 'None detected',
+      defects: [],
+      overallGrade: 'A'
     }
   });
 
@@ -59,7 +62,9 @@ const KitchenRecipe = () => {
           color: Math.random() > 0.9 ? 'Good green' : 'Vibrant green',
           texture: Math.random() > 0.8 ? 'Firm' : 'Crisp and firm',
           cutQuality: getLettuceQuality(completedSteps.length),
-          contamination: Math.random() > 0.95 ? 'Minor debris detected' : 'None detected'
+          contamination: Math.random() > 0.95 ? 'Minor debris detected' : 'None detected',
+          defects: getDetectedDefects(),
+          overallGrade: getOverallGrade()
         }
       }));
     }, 2000);
@@ -72,6 +77,32 @@ const KitchenRecipe = () => {
     if (step === 1) return 'Cutting in progress';
     if (step >= 2) return 'Uniform 1-inch pieces';
     return 'Ready for prep';
+  };
+
+  const getDetectedDefects = (): string[] => {
+    const possibleDefects = [
+      'Color mismatch detected in 3 leaves',
+      'Minor browning on leaf edges',
+      'Inconsistent leaf thickness',
+      'Small brown spots identified'
+    ];
+    
+    // Randomly add defects
+    const defects = [];
+    if (Math.random() > 0.7) defects.push(possibleDefects[0]); // Color mismatch
+    if (Math.random() > 0.85) defects.push(possibleDefects[1]); // Browning
+    if (Math.random() > 0.9) defects.push(possibleDefects[2]); // Thickness
+    if (Math.random() > 0.95) defects.push(possibleDefects[3]); // Spots
+    
+    return defects;
+  };
+
+  const getOverallGrade = (): string => {
+    const rand = Math.random();
+    if (rand > 0.8) return 'A';
+    if (rand > 0.6) return 'B';
+    if (rand > 0.4) return 'C';
+    return 'B'; // Default to B for demo
   };
 
   const getAIAnalysis = (completedSteps: number): string => {
@@ -226,9 +257,38 @@ const KitchenRecipe = () => {
               <CardTitle className="flex items-center gap-2">
                 <Camera className="h-5 w-5 text-purple-500" />
                 Live Lettuce Analysis
+                <div className={`h-2 w-2 rounded-full ml-auto ${
+                  iotData.lettuceAnalysis.defects.length > 0 ? 'bg-yellow-500' : 'bg-green-500'
+                } animate-pulse`} />
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4">
+              {/* Live Camera Feed */}
+              <div className="relative rounded-sm overflow-hidden border">
+                <img 
+                  src={lettuceAnalysisImage} 
+                  alt="Live lettuce analysis" 
+                  className="w-full h-48 object-cover"
+                />
+                <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                  LIVE FEED • {iotData.lastUpdate.toLocaleTimeString()}
+                </div>
+                <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                  Grade: {iotData.lettuceAnalysis.overallGrade}
+                </div>
+                
+                {/* Defect Overlays */}
+                {iotData.lettuceAnalysis.defects.length > 0 && (
+                  <div className="absolute bottom-2 left-2 right-2">
+                    <div className="bg-yellow-500/90 text-black px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      {iotData.lettuceAnalysis.defects.length} defect(s) detected
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Analysis Data */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-muted-foreground">Freshness:</span>
@@ -247,6 +307,24 @@ const KitchenRecipe = () => {
                   <div className="font-medium">{iotData.lettuceAnalysis.cutQuality}</div>
                 </div>
               </div>
+
+              {/* Defect Details */}
+              {iotData.lettuceAnalysis.defects.length > 0 && (
+                <div className="pt-3 border-t">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                    <span className="font-medium text-sm">Detected Issues:</span>
+                  </div>
+                  <div className="space-y-1">
+                    {iotData.lettuceAnalysis.defects.map((defect, index) => (
+                      <div key={index} className="text-xs bg-yellow-50 text-yellow-800 px-2 py-1 rounded">
+                        • {defect}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="pt-2 border-t">
                 <span className="text-muted-foreground text-sm">Contamination: </span>
                 <span className={`font-medium text-sm ${
