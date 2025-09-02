@@ -41,15 +41,6 @@ export const MenuItem: React.FC<MenuItemProps> = ({ item, onCustomize }) => {
           >
             Customize & Add to Cart
           </Button>
-          
-          {item.id === '1' && (
-            <Link to="/kitchen/recipe/caesar-salad" className="block">
-              <Button variant="ghost" size="sm" className="w-full text-xs">
-                <ChefHat className="h-3 w-3 mr-1" />
-                Kitchen Recipe
-              </Button>
-            </Link>
-          )}
         </div>
       </CardContent>
     </Card>

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Clock, Users, ChefHat, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Clock, Users, ChefHat, CheckCircle, Thermometer, Camera, Wifi, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,44 @@ import { caesarSaladRecipe } from '@/data/recipes';
 const KitchenRecipe = () => {
   const { recipeId } = useParams();
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [iotData, setIotData] = useState({
+    temperature: 72,
+    humidity: 45,
+    weightScale: 0,
+    ovenTemp: 0,
+    aiAnalysis: 'Ready to begin',
+    cameraStatus: 'Active',
+    lastUpdate: new Date()
+  });
+
+  // Simulate real-time IoT data updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIotData(prev => ({
+        temperature: Math.round((prev.temperature + (Math.random() - 0.5) * 2) * 10) / 10,
+        humidity: Math.max(35, Math.min(65, prev.humidity + (Math.random() - 0.5) * 5)),
+        weightScale: Math.max(0, prev.weightScale + (Math.random() - 0.3) * 10),
+        ovenTemp: completedSteps.length > 0 ? Math.random() * 400 + 200 : 0,
+        aiAnalysis: getAIAnalysis(completedSteps.length),
+        cameraStatus: Math.random() > 0.95 ? 'Reconnecting...' : 'Active',
+        lastUpdate: new Date()
+      }));
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [completedSteps]);
+
+  const getAIAnalysis = (completedSteps: number): string => {
+    const analyses = [
+      'Ready to begin',
+      'Ingredients prepared correctly',
+      'Lettuce chopping detected - Good knife technique',
+      'Dressing consistency optimal',
+      'Plating in progress - Good presentation',
+      'Dish completed successfully'
+    ];
+    return analyses[Math.min(completedSteps, analyses.length - 1)];
+  };
   
   // For now we only have Caesar salad, but this structure allows for future recipes
   const recipe = recipeId === 'caesar-salad' ? caesarSaladRecipe : null;
@@ -56,7 +94,8 @@ const KitchenRecipe = () => {
               <span className="font-medium">Back to Menu</span>
             </Link>
             <div className="text-center">
-              <h1 className="text-2xl font-medium tracking-wide">FICIO KITCHEN</h1>
+              <h1 className="text-2xl font-medium tracking-wide">INTEL KITCHEN</h1>
+              <p className="text-xs text-muted-foreground mt-1">Employee Access Only</p>
             </div>
             <div className="w-24" /> {/* Spacer for centering */}
           </div>
@@ -88,6 +127,79 @@ const KitchenRecipe = () => {
             </div>
           </div>
         </div>
+
+        {/* Real-time Telemetry Dashboard */}
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="restaurant-card">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Thermometer className="h-4 w-4 text-blue-500" />
+                  <span className="text-sm font-medium">Kitchen Temp</span>
+                </div>
+                <span className="text-lg font-mono">{iotData.temperature}°F</span>
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">Humidity: {iotData.humidity}%</div>
+            </CardContent>
+          </Card>
+
+          <Card className="restaurant-card">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-green-500" />
+                  <span className="text-sm font-medium">Scale Reading</span>
+                </div>
+                <span className="text-lg font-mono">{iotData.weightScale.toFixed(1)}g</span>
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">Real-time weight</div>
+            </CardContent>
+          </Card>
+
+          <Card className="restaurant-card">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Camera className="h-4 w-4 text-purple-500" />
+                  <span className="text-sm font-medium">AI Vision</span>
+                </div>
+                <div className={`h-2 w-2 rounded-full ${iotData.cameraStatus === 'Active' ? 'bg-green-500' : 'bg-yellow-500'}`} />
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">{iotData.cameraStatus}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="restaurant-card">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wifi className="h-4 w-4 text-orange-500" />
+                  <span className="text-sm font-medium">IoT Status</span>
+                </div>
+                <div className="h-2 w-2 rounded-full bg-green-500" />
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">All systems online</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* AI Analysis Panel */}
+        <Card className="restaurant-card mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5 text-purple-500" />
+              Real-time AI Analysis
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <p className="text-sm">{iotData.aiAnalysis}</p>
+              <span className="text-xs text-muted-foreground">
+                Last update: {iotData.lastUpdate.toLocaleTimeString()}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Ingredients */}
@@ -161,13 +273,18 @@ const KitchenRecipe = () => {
                 {recipe.steps.map((step, index) => (
                   <div key={step.id}>
                     <div 
-                      className={`p-4 rounded-sm border transition-all duration-200 cursor-pointer ${
+                      className={`p-4 rounded-sm border transition-all duration-200 cursor-pointer relative ${
                         completedSteps.includes(step.id)
                           ? 'bg-secondary border-primary'
                           : 'bg-background border-border hover:border-muted-foreground'
                       }`}
                       onClick={() => toggleStep(step.id)}
                     >
+                      {/* IoT Indicator */}
+                      <div className="absolute top-2 right-2 flex items-center gap-1">
+                        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-xs text-muted-foreground">Live</span>
+                      </div>
                       <div className="flex items-start gap-4">
                         <div className="flex-shrink-0">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
