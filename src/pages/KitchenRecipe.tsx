@@ -94,7 +94,7 @@ const KitchenRecipe = () => {
               <span className="font-medium">Back to Menu</span>
             </Link>
             <div className="text-center">
-              <h1 className="text-2xl font-medium tracking-wide">INTEL KITCHEN</h1>
+              <h1 className="text-2xl font-medium tracking-wide">Intel Kitchen</h1>
               <p className="text-xs text-muted-foreground mt-1">Employee Access Only</p>
             </div>
             <div className="w-24" /> {/* Spacer for centering */}
