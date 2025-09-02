@@ -26,7 +26,7 @@ export const Header: React.FC<HeaderProps> = ({ onCartClick }) => {
             About
           </a>
           <a href="/kitchen/recipe/caesar-salad" className="text-sm font-medium transition-colors hover:text-primary border border-border px-3 py-1 rounded-sm bg-muted/50">
-            Intel Kitchen (employee only)
+            Inteli Kitchen (employee only)
           </a>
           <a href="#contact" className="text-sm font-medium transition-colors hover:text-primary">
             Contact

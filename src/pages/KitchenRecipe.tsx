@@ -18,25 +18,61 @@ const KitchenRecipe = () => {
     ovenTemp: 0,
     aiAnalysis: 'Ready to begin',
     cameraStatus: 'Active',
-    lastUpdate: new Date()
+    lastUpdate: new Date(),
+    ingredientTemps: {
+      lettuce: 38,
+      parmesan: 42,
+      croutons: 68,
+      anchovies: 36,
+      dressing: 40
+    },
+    lettuceAnalysis: {
+      freshness: 95,
+      color: 'Vibrant green',
+      texture: 'Crisp and firm',
+      cutQuality: 'Uniform 1-inch pieces',
+      contamination: 'None detected'
+    }
   });
 
   // Simulate real-time IoT data updates
   useEffect(() => {
     const interval = setInterval(() => {
       setIotData(prev => ({
+        ...prev,
         temperature: Math.round((prev.temperature + (Math.random() - 0.5) * 2) * 10) / 10,
         humidity: Math.max(35, Math.min(65, prev.humidity + (Math.random() - 0.5) * 5)),
         weightScale: Math.max(0, prev.weightScale + (Math.random() - 0.3) * 10),
         ovenTemp: completedSteps.length > 0 ? Math.random() * 400 + 200 : 0,
         aiAnalysis: getAIAnalysis(completedSteps.length),
         cameraStatus: Math.random() > 0.95 ? 'Reconnecting...' : 'Active',
-        lastUpdate: new Date()
+        lastUpdate: new Date(),
+        ingredientTemps: {
+          lettuce: Math.round((38 + (Math.random() - 0.5) * 4) * 10) / 10,
+          parmesan: Math.round((42 + (Math.random() - 0.5) * 6) * 10) / 10,
+          croutons: Math.round((68 + (Math.random() - 0.5) * 8) * 10) / 10,
+          anchovies: Math.round((36 + (Math.random() - 0.5) * 4) * 10) / 10,
+          dressing: Math.round((40 + (Math.random() - 0.5) * 6) * 10) / 10
+        },
+        lettuceAnalysis: {
+          freshness: Math.max(85, Math.min(98, prev.lettuceAnalysis.freshness + (Math.random() - 0.5) * 2)),
+          color: Math.random() > 0.9 ? 'Good green' : 'Vibrant green',
+          texture: Math.random() > 0.8 ? 'Firm' : 'Crisp and firm',
+          cutQuality: getLettuceQuality(completedSteps.length),
+          contamination: Math.random() > 0.95 ? 'Minor debris detected' : 'None detected'
+        }
       }));
     }, 2000);
 
     return () => clearInterval(interval);
   }, [completedSteps]);
+
+  const getLettuceQuality = (step: number): string => {
+    if (step === 0) return 'Whole leaves detected';
+    if (step === 1) return 'Cutting in progress';
+    if (step >= 2) return 'Uniform 1-inch pieces';
+    return 'Ready for prep';
+  };
 
   const getAIAnalysis = (completedSteps: number): string => {
     const analyses = [
@@ -94,7 +130,7 @@ const KitchenRecipe = () => {
               <span className="font-medium">Back to Menu</span>
             </Link>
             <div className="text-center">
-              <h1 className="text-2xl font-medium tracking-wide">Intel Kitchen</h1>
+              <h1 className="text-2xl font-medium tracking-wide">Inteli Kitchen</h1>
               <p className="text-xs text-muted-foreground mt-1">Employee Access Only</p>
             </div>
             <div className="w-24" /> {/* Spacer for centering */}
@@ -184,22 +220,69 @@ const KitchenRecipe = () => {
         </div>
 
         {/* AI Analysis Panel */}
-        <Card className="restaurant-card mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Camera className="h-5 w-5 text-purple-500" />
-              Real-time AI Analysis
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <p className="text-sm">{iotData.aiAnalysis}</p>
-              <span className="text-xs text-muted-foreground">
+        <div className="grid lg:grid-cols-2 gap-6 mb-8">
+          <Card className="restaurant-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Camera className="h-5 w-5 text-purple-500" />
+                Live Lettuce Analysis
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Freshness:</span>
+                  <div className="font-mono text-green-600">{iotData.lettuceAnalysis.freshness.toFixed(1)}%</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Color:</span>
+                  <div className="font-medium">{iotData.lettuceAnalysis.color}</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Texture:</span>
+                  <div className="font-medium">{iotData.lettuceAnalysis.texture}</div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Cut Quality:</span>
+                  <div className="font-medium">{iotData.lettuceAnalysis.cutQuality}</div>
+                </div>
+              </div>
+              <div className="pt-2 border-t">
+                <span className="text-muted-foreground text-sm">Contamination: </span>
+                <span className={`font-medium text-sm ${
+                  iotData.lettuceAnalysis.contamination === 'None detected' ? 'text-green-600' : 'text-yellow-600'
+                }`}>
+                  {iotData.lettuceAnalysis.contamination}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="restaurant-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Thermometer className="h-5 w-5 text-blue-500" />
+                Ingredient Temperatures
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {Object.entries(iotData.ingredientTemps).map(([ingredient, temp]) => (
+                <div key={ingredient} className="flex items-center justify-between">
+                  <span className="capitalize text-sm font-medium">{ingredient}:</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-sm">{temp}°F</span>
+                    <div className={`h-2 w-2 rounded-full ${
+                      temp < 40 ? 'bg-blue-500' : temp < 50 ? 'bg-green-500' : 'bg-yellow-500'
+                    }`} />
+                  </div>
+                </div>
+              ))}
+              <div className="pt-2 border-t text-xs text-muted-foreground">
                 Last update: {iotData.lastUpdate.toLocaleTimeString()}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Ingredients */}
